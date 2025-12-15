@@ -13,6 +13,12 @@ class ChatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
         centerTitle: true,
         title: _buildModelSelector(),
         actions: [
@@ -20,29 +26,40 @@ class ChatScreen extends StatelessWidget {
         ],
       ),
       drawer: const AppDrawer(),
-      body: Column(
-        children: [
-          Expanded(
-            child: Consumer<ChatProvider>(
-              builder: (context, chatProvider, child) {
-                if (chatProvider.messages.isEmpty) {
-                   return _buildEmptyState(context);
-                }
+      body: Builder(
+        builder: (context) {
+          return GestureDetector(
+            // Detect swipe right (drag from left to right)
+            onHorizontalDragEnd: (details) {
+              if (details.primaryVelocity! > 0) {
+                // Velocity > 0 means moving towards right (opening left drawer)
+                Scaffold.of(context).openDrawer();
+              }
+            },
+            child: Column(
+              children: [
+                Expanded(
+                  child: Consumer<ChatProvider>(
+                    builder: (context, chatProvider, child) {
+                      if (chatProvider.messages.isEmpty) {
+                         return _buildEmptyState(context);
+                      }
 
-                return ListView.builder(
-                  // Attach to bottom if needed, but standard chat is top-down usually unless sticky bottom
-                  // We'll stick to standard builder.
-                  padding: const EdgeInsets.only(bottom: 20),
-                  itemCount: chatProvider.messages.length,
-                  itemBuilder: (context, index) {
-                    return ChatMessageWidget(message: chatProvider.messages[index]);
-                  },
-                );
-              },
+                      return ListView.builder(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        itemCount: chatProvider.messages.length,
+                        itemBuilder: (context, index) {
+                          return ChatMessageWidget(message: chatProvider.messages[index]);
+                        },
+                      );
+                    },
+                  ),
+                ),
+                const InputArea(),
+              ],
             ),
-          ),
-          const InputArea(),
-        ],
+          );
+        }
       ),
     );
   }
@@ -88,7 +105,6 @@ class ChatScreen extends StatelessWidget {
                )
             ),
             const SizedBox(height: 40),
-            // Example prompts
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Wrap(

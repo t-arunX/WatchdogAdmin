@@ -43,14 +43,13 @@ class _InputAreaState extends State<InputArea> {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.background, // Chat background flows into input area on mobile usually, but desktop has gradient.
-        // We'll mimic the mobile/web responsive feel: Solid bg.
+        color: AppColors.background,
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-             Color(0x00343541), // Transparent fade start
-             AppColors.background, // Solid at bottom
+             Color(0x00343541),
+             AppColors.background,
           ],
           stops: [0.0, 0.2],
         )
@@ -64,8 +63,8 @@ class _InputAreaState extends State<InputArea> {
             Container(
               decoration: BoxDecoration(
                 color: AppColors.inputBackground,
-                borderRadius: BorderRadius.circular(16), // Rounded pill shape
-                border: Border.all(color: Colors.transparent), // Could add focus border here
+                borderRadius: BorderRadius.circular(26), // More rounded like modern GPT
+                border: Border.all(color: Colors.transparent),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
@@ -78,6 +77,18 @@ class _InputAreaState extends State<InputArea> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
+                  // Attachment Icon
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12.0, bottom: 10.0), // Align with single line text
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.transparent, // Or slight background
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.add, color: AppColors.textSecondary, size: 24),
+                    ),
+                  ),
+
                   Expanded(
                     child: TextField(
                       controller: _controller,
@@ -92,10 +103,15 @@ class _InputAreaState extends State<InputArea> {
                         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         isDense: true,
                       ),
-                      maxLines: 6,
-                      minLines: 1,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => _handleSend(),
+                      // Dynamic Inputs configuration:
+                      maxLines: 8, // Grows up to 8 lines
+                      minLines: 1, // Starts at 1
+                      textInputAction: TextInputAction.newline, // Allow newlines easily
+                      keyboardType: TextInputType.multiline,
+                      // We handle send manually or via specific key logic if desktop,
+                      // but for mobile usually 'enter' is newline.
+                      // If we want enter to send on desktop, we need RawKeyboardListener,
+                      // but let's stick to mobile-first dynamic input behavior.
                     ),
                   ),
                   Padding(
@@ -103,16 +119,17 @@ class _InputAreaState extends State<InputArea> {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       decoration: BoxDecoration(
-                        color: _canSend ? AppColors.primaryAction : Colors.transparent,
+                        color: _canSend ? AppColors.textPrimary : Colors.transparent, // White bg when active (modern style)
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_upward, size: 20, color: _canSend ? Colors.white : AppColors.textSecondary),
-                        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                        padding: EdgeInsets.zero,
-                        splashRadius: 20,
-                        onPressed: _handleSend,
-                        tooltip: "Send message",
+                      padding: const EdgeInsets.all(4), // Padding inside the button container
+                      child: InkWell(
+                         onTap: _canSend ? _handleSend : null,
+                         child: Icon(
+                           Icons.arrow_upward,
+                           size: 20,
+                           color: _canSend ? AppColors.inputBackground : AppColors.textSecondary // Icon becomes dark on white bg
+                         ),
                       ),
                     ),
                   ),
