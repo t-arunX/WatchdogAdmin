@@ -1,8 +1,5 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:uuid/uuid.dart'; // Assuming we might want unique IDs, but I didn't add uuid to pubspec. I'll simple strings for now or mock it.
-// Actually I'll just use DateTime as ID for simplicity since I can't add packages easily without internet verification (though I have it).
-// I will stick to simple string generation.
-
 import '../models/message.dart';
 
 class ChatProvider extends ChangeNotifier {
@@ -12,21 +9,10 @@ class ChatProvider extends ChangeNotifier {
   List<Message> get messages => List.unmodifiable(_messages);
   bool get isTyping => _isTyping;
 
-  // Mock initial greeting
-  ChatProvider() {
-    _addMessage(
-      Message(
-        id: DateTime.now().toString(),
-        content: "Hello! I'm a ChatGPT clone made with Flutter. How can I help you today?",
-        sender: MessageSender.assistant,
-        timestamp: DateTime.now(),
-      ),
-    );
-  }
-
   void sendMessage(String content) async {
     if (content.trim().isEmpty) return;
 
+    // 1. Add User Message
     final userMessage = Message(
       id: DateTime.now().toString(),
       content: content,
@@ -38,18 +24,73 @@ class ChatProvider extends ChangeNotifier {
     _isTyping = true;
     notifyListeners();
 
-    // Simulate network delay and response
-    await Future.delayed(const Duration(seconds: 1));
+    // 2. Prepare Assistant Response (Streaming)
+    await Future.delayed(const Duration(milliseconds: 600)); // Network latency simulation
 
     final assistantMessage = Message(
       id: DateTime.now().add(const Duration(milliseconds: 100)).toString(),
-      content: "This is a simulated response to: \"$content\".\n\nI can render **Markdown** too!",
+      content: "", // Start empty
       sender: MessageSender.assistant,
       timestamp: DateTime.now(),
+      isStreaming: true,
     );
 
-    _isTyping = false;
     _addMessage(assistantMessage);
+
+    // 3. Stream the response content
+    final fullResponse = _generateMockResponse(content);
+
+    // Simulate typing effect
+    for (int i = 0; i < fullResponse.length; i++) {
+      await Future.delayed(const Duration(milliseconds: 20)); // Typing speed
+
+      // Fix: Update the specific assistantMessage object, NOT _messages.last
+      // This prevents race conditions if the user sends another message while streaming.
+      assistantMessage.content += fullResponse[i];
+      notifyListeners();
+    }
+
+    assistantMessage.isStreaming = false;
+    _isTyping = false;
+    notifyListeners();
+  }
+
+  String _generateMockResponse(String input) {
+    // A more elaborate mock response generator to show off markdown capabilities
+    if (input.toLowerCase().contains("code") || input.toLowerCase().contains("flutter")) {
+      return """Here is a simple example of a Counter app in Flutter:
+
+```dart
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Counter')),
+        body: const Center(child: Text('0')),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {},
+          child: const Icon(Icons.add),
+        ),
+      ),
+    );
+  }
+}
+```
+
+This code sets up a basic `MaterialApp` with a `Scaffold`. Let me know if you need any adjustments!
+""";
+    }
+
+    return "I am a simulated ChatGPT interface built with Flutter. You said: \"$input\".\n\nI can formatted text like **bold**, *italics*, and lists:\n\n1. First item\n2. Second item\n3. Third item\n\nIs there anything else I can help you with?";
   }
 
   void _addMessage(Message message) {
