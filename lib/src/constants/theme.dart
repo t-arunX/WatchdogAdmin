@@ -1,92 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  // Main Backgrounds
-  static const Color background = Color(0xFF343541); // Main chat bg
-  static const Color sidebarBackground = Color(0xFF202123); // Sidebar bg
+  // Deep dark background (Visual analysis of IMG_4372)
+  static const Color background = Color(0xFF050509);
 
-  // Message Backgrounds
-  static const Color assistantMessageBackground = Color(0xFF444654);
-  static const Color userMessageBackground = Color(0xFF343541); // Matches main bg
+  // Sidebar / Surface colors
+  static const Color sidebarBackground = Color(0xFF0F0F12);
+  static const Color cardBackground = Color(0xFF1E1E2E);
 
-  // Input Area
-  static const Color inputBackground = Color(0xFF40414F);
-  static const Color inputBorder = Color(0xFF565869); // Subtle border
+  // Input area
+  static const Color inputBackground = Color(0xFF1E1E2E); // Dark pill shape
 
-  // Text Colors
-  static const Color textPrimary = Color(0xFFECECF1);
-  static const Color textSecondary = Color(0xFFC5C5D2);
-  static const Color textDiscreet = Color(0xFF8E8EA0); // For the footer disclaimer
+  // Text
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xFFA1A1AA); // Light grey
+  static const Color textDiscreet = Color(0xFF52525B); // Darker grey for disclaimers
 
-  // Accents / Buttons
-  static const Color primaryAction = Color(0xFF19C37D); // ChatGPT Green
-  static const Color primaryActionHover = Color(0xFF1A7F64);
-  static const Color newChatButton = Color(0xFF202123); // Matches sidebar but has border
-  static const Color iconColor = Color(0xFFD9D9E3);
+  // Accents
+  static const Color primary = Color(0xFF6D28D9); // Purple accent
+  static const Color secondary = Color(0xFF10B981); // Green accent (e.g. for "Ready" badges)
 
   // Avatars
-  static const Color userAvatarColor = Color(0xFF5436DA); // Example purple for user
-  static const Color gptAvatarColor = Color(0xFF19C37D); // Green logo
+  static const Color userAvatarColor = Color(0xFF3F3F46);
+  static const Color julesAvatarColor = Color(0xFF6D28D9); // Purple for Jules
 }
 
 class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
-      useMaterial3: true,
-      scaffoldBackgroundColor: AppColors.background,
-      primaryColor: AppColors.primaryAction,
       brightness: Brightness.dark,
+      scaffoldBackgroundColor: AppColors.background,
+      primaryColor: AppColors.primary,
 
-      // Typography
-      textTheme: GoogleFonts.interTextTheme(
-        ThemeData.dark().textTheme,
-      ).apply(
-        bodyColor: AppColors.textPrimary,
-        displayColor: AppColors.textPrimary,
-      ),
-
-      // Icon Theme
-      iconTheme: const IconThemeData(color: AppColors.iconColor),
-
-      // AppBar Theme
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.background, // Mobile header often blends or is slightly dark
+        backgroundColor: AppColors.background,
         elevation: 0,
-        scrolledUnderElevation: 0,
-        titleTextStyle: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600),
+        titleTextStyle: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w600),
         iconTheme: IconThemeData(color: AppColors.textSecondary),
       ),
 
-      // Drawer Theme
-      drawerTheme: const DrawerThemeData(
-        backgroundColor: AppColors.sidebarBackground,
+      textTheme: const TextTheme(
+        bodyMedium: TextStyle(color: AppColors.textPrimary),
+        bodySmall: TextStyle(color: AppColors.textSecondary),
       ),
 
-      // Input Decoration (Defaults)
+      iconTheme: const IconThemeData(
+        color: AppColors.textSecondary,
+      ),
+
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.inputBackground,
-        hintStyle: const TextStyle(color: Colors.white38),
+        hintStyle: const TextStyle(color: AppColors.textDiscreet),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(30), // Pill shape defaults
           borderSide: BorderSide.none,
         ),
-        enabledBorder: OutlineInputBorder(
-           borderRadius: BorderRadius.circular(12),
-           borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-           borderRadius: BorderRadius.circular(12),
-           borderSide: BorderSide.none,
-        ),
       ),
-
-      textSelectionTheme: const TextSelectionThemeData(
-        cursorColor: AppColors.primaryAction,
-        selectionColor: Color(0xFF1A7F64), // Darker green
-        selectionHandleColor: AppColors.primaryAction,
-      )
     );
   }
 }

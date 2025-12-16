@@ -13,59 +13,81 @@ class ChatMessageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final isUser = message.sender == MessageSender.user;
 
-    // Transparent background for 2024 UI style
-    final backgroundColor = Colors.transparent;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: [
+          if (!isUser) ...[
+            _buildAvatar(isUser),
+            const SizedBox(width: 12),
+          ],
 
-    return Container(
-      color: backgroundColor,
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-      child: Center(
-        child: SizedBox(
-          width: 768, // Max width for readability
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildAvatar(isUser),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                     Padding(
-                       padding: const EdgeInsets.only(top: 4.0),
-                       child: isUser
-                        ? Text(message.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, height: 1.5))
-                        : MarkdownBody(
-                            data: message.content + (message.isStreaming ? " ●" : ""),
-                            builders: {
-                              'code': CodeElementBuilder(),
-                            },
-                            styleSheet: MarkdownStyleSheet(
-                              p: const TextStyle(color: AppColors.textPrimary, fontSize: 16, height: 1.5),
-                              strong: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
-                              h1: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 24),
-                              h2: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 20),
-                              // Code block decoration is now handled by the builder, but inline code needs style
-                              code: const TextStyle(
-                                backgroundColor: Colors.black26,
-                                color: AppColors.textPrimary,
-                                fontFamily: 'monospace',
-                                fontSize: 14,
-                              ),
-                              blockquote: const TextStyle(color: AppColors.textSecondary),
-                              blockquoteDecoration: const BoxDecoration(
-                                border: Border(left: BorderSide(color: AppColors.textSecondary, width: 4)),
-                              ),
-                            ),
-                            selectable: true,
-                          ),
-                     ),
-                  ],
+          Flexible(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 768),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isUser ? AppColors.inputBackground : AppColors.cardBackground,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  topRight: const Radius.circular(16),
+                  bottomLeft: isUser ? const Radius.circular(16) : const Radius.circular(4),
+                  bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(16),
+                ),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.05),
                 ),
               ),
-            ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (isUser)
+                    Text(
+                      message.content,
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, height: 1.5),
+                    )
+                  else
+                    MarkdownBody(
+                      data: message.content + (message.isStreaming ? " ●" : ""),
+                      builders: {
+                        'code': CodeElementBuilder(),
+                      },
+                      styleSheet: MarkdownStyleSheet(
+                        p: const TextStyle(color: AppColors.textPrimary, fontSize: 15, height: 1.5),
+                        strong: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+                        h1: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 22),
+                        h2: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18),
+                        h3: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16),
+                        code: const TextStyle(
+                          backgroundColor: Colors.transparent, // Handled by builder
+                          color: AppColors.primary,
+                          fontFamily: 'monospace',
+                          fontSize: 14,
+                        ),
+                        codeblockDecoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.white10),
+                        ),
+                        blockquote: const TextStyle(color: AppColors.textSecondary),
+                        blockquoteDecoration: const BoxDecoration(
+                          border: Border(left: BorderSide(color: AppColors.primary, width: 4)),
+                        ),
+                      ),
+                      selectable: true,
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
+
+          if (isUser) ...[
+            const SizedBox(width: 12),
+            _buildAvatar(isUser),
+          ],
+        ],
       ),
     );
   }
@@ -73,26 +95,26 @@ class ChatMessageWidget extends StatelessWidget {
   Widget _buildAvatar(bool isUser) {
     if (isUser) {
       return Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
+        width: 32,
+        height: 32,
+        decoration: const BoxDecoration(
           color: AppColors.userAvatarColor,
-          borderRadius: BorderRadius.circular(4),
+          shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
-        child: const Text("U", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+        child: const Icon(Icons.person, size: 16, color: Colors.white),
       );
     } else {
       return Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          color: AppColors.gptAvatarColor,
-          borderRadius: BorderRadius.circular(4),
+        width: 32,
+        height: 32,
+        decoration: const BoxDecoration(
+          color: AppColors.julesAvatarColor,
+          shape: BoxShape.circle,
         ),
-        padding: const EdgeInsets.all(4),
+        alignment: Alignment.center,
         child: const Icon(
-          Icons.bolt,
+          Icons.smart_toy, // Changed to a bot icon for Jules
           color: Colors.white,
           size: 18,
         ),

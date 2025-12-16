@@ -11,13 +11,13 @@ class InputArea extends StatefulWidget {
 }
 
 class _InputAreaState extends State<InputArea> {
-  final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+  late final TextEditingController _controller;
   bool _canSend = false;
 
   @override
   void initState() {
     super.initState();
+    _controller = TextEditingController();
     _controller.addListener(() {
       setState(() {
         _canSend = _controller.text.trim().isNotEmpty;
@@ -28,110 +28,84 @@ class _InputAreaState extends State<InputArea> {
   @override
   void dispose() {
     _controller.dispose();
-    _focusNode.dispose();
     super.dispose();
   }
 
   void _handleSend() {
     if (!_canSend) return;
-    context.read<ChatProvider>().sendMessage(_controller.text);
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
+    context.read<ChatProvider>().sendMessage(text);
     _controller.clear();
-    _focusNode.requestFocus(); // Keep focus
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-             Color(0x00343541),
-             AppColors.background,
-          ],
-          stops: [0.0, 0.2],
-        )
-      ),
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 24, top: 10),
+      color: AppColors.background,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // The Input Pill
+            // Pill-shaped Input Container
             Container(
               decoration: BoxDecoration(
                 color: AppColors.inputBackground,
-                borderRadius: BorderRadius.circular(26), // More rounded like modern GPT
-                border: Border.all(color: Colors.transparent),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    spreadRadius: 0,
-                    blurRadius: 10,
-                    offset: const Offset(0, 0),
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: Colors.white.withOpacity(0.1)),
               ),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // Attachment Icon
-                  Padding(
-                    padding: const EdgeInsets.only(left: 12.0, bottom: 10.0), // Align with single line text
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.transparent, // Or slight background
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.add, color: AppColors.textSecondary, size: 24),
-                    ),
-                  ),
-
+                  const SizedBox(width: 16),
                   Expanded(
                     child: TextField(
                       controller: _controller,
-                      focusNode: _focusNode,
-                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, height: 1.5),
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 16),
+                      minLines: 1,
+                      maxLines: 5,
                       decoration: const InputDecoration(
-                        hintText: 'Message ChatGPT...',
-                        hintStyle: TextStyle(color: Colors.white38),
+                        hintText: 'Talk to Jules',
+                        hintStyle: TextStyle(color: AppColors.textDiscreet),
                         border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        enabledBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 12),
                         isDense: true,
+                        filled: false,
                       ),
-                      // Dynamic Inputs configuration:
-                      maxLines: 8, // Grows up to 8 lines
-                      minLines: 1, // Starts at 1
-                      textInputAction: TextInputAction.newline, // Allow newlines easily
-                      keyboardType: TextInputType.multiline,
-                      // We handle send manually or via specific key logic if desktop,
-                      // but for mobile usually 'enter' is newline.
-                      // If we want enter to send on desktop, we need RawKeyboardListener,
-                      // but let's stick to mobile-first dynamic input behavior.
+                      onSubmitted: (_) => _handleSend(),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      decoration: BoxDecoration(
-                        color: _canSend ? AppColors.textPrimary : Colors.transparent, // White bg when active (modern style)
-                        borderRadius: BorderRadius.circular(8),
+                  // Icons Row (Plus and Send)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.add, color: AppColors.textSecondary),
+                        onPressed: () {}, // Attachment stub
+                        tooltip: 'Add attachment',
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                       ),
-                      padding: const EdgeInsets.all(4), // Padding inside the button container
-                      child: InkWell(
-                         onTap: _canSend ? _handleSend : null,
-                         child: Icon(
-                           Icons.arrow_upward,
-                           size: 20,
-                           color: _canSend ? AppColors.inputBackground : AppColors.textSecondary // Icon becomes dark on white bg
-                         ),
+                      const SizedBox(width: 4),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: _canSend ? AppColors.primary : Colors.white.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_upward_rounded, size: 20),
+                          color: _canSend ? Colors.white : AppColors.textDiscreet,
+                          onPressed: _canSend ? _handleSend : null,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 4),
+                    ],
                   ),
                 ],
               ),
@@ -139,7 +113,7 @@ class _InputAreaState extends State<InputArea> {
             const SizedBox(height: 12),
             // The Disclaimer
             const Text(
-              'ChatGPT can make mistakes. Consider checking important information.',
+              'Jules can make mistakes so double-check it and use code with caution',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.textDiscreet,

@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:markdown/markdown.dart' as md;
 import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CodeElementBuilder extends MarkdownElementBuilder {
   @override
-  Widget? visitElementAfter(context, element) {
+  Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
     // Check if it's block code or inline
     final bool isMultiline = element.textContent.contains('\n');
     final String? className = element.attributes['class'];
     final bool hasLanguageClass = className != null && className.startsWith('language-');
 
-    // Inline fallback
+    // Inline fallback: let markdown widget handle it usually, or return customized container
+    // If it's just a short inline `code`, usually we return null to let the styleSheet handle it.
     if (!isMultiline && !hasLanguageClass) {
       return null;
     }
@@ -64,7 +66,7 @@ class CodeElementBuilder extends MarkdownElementBuilder {
              child: HighlightView(
               codeContent,
               language: language,
-              theme: atomOneDarkTheme, // Correct snake_case theme
+              theme: atomOneDarkTheme,
               padding: const EdgeInsets.all(16),
               textStyle: GoogleFonts.firaCode(fontSize: 14),
             ),

@@ -12,72 +12,79 @@ class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
+            icon: const Icon(Icons.menu, color: AppColors.textSecondary),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        centerTitle: true,
-        title: _buildModelSelector(),
+        title: Row(
+          children: [
+            const Icon(Icons.terminal, color: AppColors.textSecondary, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                "t-arunX/WatchdogAdminPanel", // Mimicking the screenshot
+                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
         actions: [
-           IconButton(onPressed: () {}, icon: const Icon(Icons.ios_share_outlined)),
+           IconButton(
+             onPressed: () {},
+             icon: const Icon(Icons.add, color: AppColors.primary),
+             tooltip: 'New Chat',
+           ),
+           IconButton(
+             onPressed: () {},
+             icon: const Icon(Icons.settings_outlined, color: AppColors.textSecondary),
+             tooltip: 'Settings',
+           ),
+           const SizedBox(width: 8),
+           const CircleAvatar(
+             radius: 12,
+             backgroundColor: AppColors.userAvatarColor,
+             child: Icon(Icons.person, size: 16, color: Colors.white),
+           ),
+           const SizedBox(width: 16),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: Colors.white.withOpacity(0.05), height: 1),
+        ),
       ),
       drawer: const AppDrawer(),
       body: Builder(
         builder: (context) {
-          return GestureDetector(
-            // Detect swipe right (drag from left to right)
-            onHorizontalDragEnd: (details) {
-              if (details.primaryVelocity! > 0) {
-                // Velocity > 0 means moving towards right (opening left drawer)
-                Scaffold.of(context).openDrawer();
-              }
-            },
-            child: Column(
-              children: [
-                Expanded(
-                  child: Consumer<ChatProvider>(
-                    builder: (context, chatProvider, child) {
-                      if (chatProvider.messages.isEmpty) {
-                         return _buildEmptyState(context);
-                      }
+          return Column(
+            children: [
+              Expanded(
+                child: Consumer<ChatProvider>(
+                  builder: (context, chatProvider, child) {
+                    if (chatProvider.messages.isEmpty) {
+                       return _buildEmptyState(context);
+                    }
 
-                      return ListView.builder(
-                        padding: const EdgeInsets.only(bottom: 20),
-                        itemCount: chatProvider.messages.length,
-                        itemBuilder: (context, index) {
-                          return ChatMessageWidget(message: chatProvider.messages[index]);
-                        },
-                      );
-                    },
-                  ),
+                    return ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 20, top: 20),
+                      itemCount: chatProvider.messages.length,
+                      itemBuilder: (context, index) {
+                        return ChatMessageWidget(message: chatProvider.messages[index]);
+                      },
+                    );
+                  },
                 ),
-                const InputArea(),
-              ],
-            ),
+              ),
+              const InputArea(),
+            ],
           );
         }
-      ),
-    );
-  }
-
-  Widget _buildModelSelector() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.sidebarBackground,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-           Text("GPT-4", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-           SizedBox(width: 4),
-           Icon(Icons.keyboard_arrow_down, size: 16, color: AppColors.textSecondary)
-        ],
       ),
     );
   }
@@ -89,57 +96,33 @@ class ChatScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                color: Colors.white10,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.cardBackground,
                 shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withOpacity(0.1)),
               ),
-              child: const Icon(Icons.bolt, size: 40, color: AppColors.textPrimary),
+              child: const Icon(Icons.smart_toy_outlined, size: 48, color: AppColors.primary),
             ),
-            const SizedBox(height: 20),
-            Text(
-               'How can I help you today?',
-               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            const SizedBox(height: 24),
+            const Text(
+               'Jules',
+               style: TextStyle(
+                 fontSize: 24,
                  fontWeight: FontWeight.bold,
                  color: AppColors.textPrimary,
                )
             ),
-            const SizedBox(height: 40),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                alignment: WrapAlignment.center,
-                children: [
-                   _buildSuggestionCard("Explain quantum computing", "in simple terms"),
-                   _buildSuggestionCard("Got any creative ideas", "for a 10 year old's birthday?"),
-                   _buildSuggestionCard("How do I make an HTTP request", "in Javascript?"),
-                ],
-              ),
+             const SizedBox(height: 8),
+            const Text(
+               'AI Engineering Assistant',
+               style: TextStyle(
+                 fontSize: 16,
+                 color: AppColors.textSecondary,
+               )
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSuggestionCard(String title, String subtitle) {
-    return Container(
-      width: 160,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.inputBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
-          const SizedBox(height: 4),
-          Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-        ],
       ),
     );
   }
